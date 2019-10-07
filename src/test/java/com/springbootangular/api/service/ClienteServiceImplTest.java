@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 public class ClienteServiceImplTest {
 
+    //Anotacion Mock para testing
     @Mock
     ClienteRepository clienteRepository;
 
