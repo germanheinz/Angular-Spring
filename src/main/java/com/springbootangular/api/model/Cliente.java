@@ -1,6 +1,7 @@
-package com.gh.springboot.api.model;
+package com.springbootangular.api.model;
 
-import lombok.*;
+import lombok.Data;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -14,7 +15,7 @@ import java.util.Date;
 public class Cliente implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
     private String apellido;
