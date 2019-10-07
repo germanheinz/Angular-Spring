@@ -1,4 +1,4 @@
-package com.springbootangular.api.model;
+package com.springbootangular.api.domain;
 
 import lombok.Data;
 

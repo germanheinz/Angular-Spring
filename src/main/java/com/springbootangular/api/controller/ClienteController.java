@@ -1,7 +1,8 @@
 package com.springbootangular.api.controller;
 
-import com.springbootangular.api.model.Cliente;
+import com.springbootangular.api.domain.Cliente;
 import com.springbootangular.api.service.ClienteService;
+import com.springbootangular.api.v1.model.ClienteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class ClienteController {
     }
 
     @GetMapping("/clientes")
-    public List<Cliente> index() {
+    public List<ClienteDTO> index() {
         return clienteService.findAll();
     }
 
