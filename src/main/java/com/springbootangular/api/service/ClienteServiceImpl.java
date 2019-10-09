@@ -29,7 +29,6 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     @Transactional(readOnly = true)
     public List<ClienteDTO> findAll() {
-
         return clienteRepository
                 .findAll()
                 .stream()

@@ -22,9 +22,9 @@ public class Cliente implements Serializable {
     private String email;
     //La anotacion column va para las diferentes columnas en la tabla
     //pero especificamente para especificar un nombre diferente en que va a mappear en la tabla
-    @Column(name="create_at")
+    @Column(name="customer_url")
     //Anotacion para transformar el valor en un tipo DATE en la tabla
     @Temporal(TemporalType.DATE)
-    private Date createAt;
+    private Date customerUrl;
 
 }
