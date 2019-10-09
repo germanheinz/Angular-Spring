@@ -12,6 +12,6 @@ public class ClienteDTO {
     private String nombre;
     private String apellido;
 
-    @JsonProperty("create_at")
-    private String createAt;
+    @JsonProperty("customer_url")
+    private String customerUrl;
 }
