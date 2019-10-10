@@ -14,6 +14,6 @@ public class ClienteDTO {
     private String nombre;
     private String apellido;
 
-    @JsonProperty("customer_url")
+    //@JsonProperty("customer_url")
     private String customerUrl;
 }

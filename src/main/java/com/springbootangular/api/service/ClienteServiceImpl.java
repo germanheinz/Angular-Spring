@@ -34,7 +34,7 @@ public class ClienteServiceImpl implements ClienteService {
                 .stream()
                 .map(customer -> {
                     ClienteDTO clienteDTO = clienteMapper.customerToCustomerDTO(customer);
-                    clienteDTO.setCustomerUrl(getCustomerUrl(customer.getId()));
+                    //clienteDTO.setCustomerUrl(getCustomerUrl(customer.getId()));
                     return clienteDTO;
                 })
                 .collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.findById(id)
                 .map(clienteMapper::customerToCustomerDTO)
                 .map(clienteDTO -> {
-                    clienteDTO.setCustomerUrl(getCustomerUrl(id));
+                    //clienteDTO.setCustomerUrl(getCustomerUrl(id));
                     return clienteDTO;
                 })
                 .orElseThrow(ResourceNotFoundException::new);
@@ -62,7 +62,7 @@ public class ClienteServiceImpl implements ClienteService {
 
         Cliente savedCustomer = clienteRepository.save(cliente);
         ClienteDTO returnDto = clienteMapper.customerToCustomerDTO(savedCustomer);
-        returnDto.setCustomerUrl(getCustomerUrl(savedCustomer.getId()));
+        //returnDto.setCustomerUrl(getCustomerUrl(savedCustomer.getId()));
 
         return returnDto;
     }

@@ -24,7 +24,7 @@ public class Cliente implements Serializable {
     //pero especificamente para especificar un nombre diferente en que va a mappear en la tabla
     @Column(name="customer_url")
     //Anotacion para transformar el valor en un tipo DATE en la tabla
-    @Temporal(TemporalType.DATE)
-    private Date customerUrl;
+    //@Temporal(TemporalType.DATE)
+    private String customerUrl;
 
 }
