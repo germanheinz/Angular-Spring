@@ -69,11 +69,19 @@ public class ClienteController {
         response.put("mensaje", "El cliente se ha creado con exito");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
+/*
+* Para validar todas las anotaciones en el modelo Entity Clientes se debe anotar @Valid seguido de @RequestBody + el objeto
 
+* Despues BindingResult result nos dira los errores que hubieron
+*
+* se hace un condicional para obtenerlos en caso de que hubiesen
+* * */
     @PutMapping({"/{id}"})
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody ClienteDTO clienteDTO) {
+    public ResponseEntity<?> updateCustomer(@Valid @RequestBody ClienteDTO clienteDTO, @PathVariable Long id, BindingResult result) {
+
         ClienteDTO cliente = clienteService.findById(id);
+
         ClienteDTO clienteUpdated = null;
 
         Map<String, Object> response = new HashMap<>();
@@ -82,10 +90,17 @@ public class ClienteController {
             response.put("mensaje", "Error el cliente con el id".concat(id.toString().concat("no existe en la base de datos")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
+
+        if (result.hasErrors()) {
+            List<String> errors = result.getFieldErrors()
+                    .stream()
+                    .map(err -> "El campo" + err.getField() + " " + err.getDefaultMessage())
+                    .collect(Collectors.toList());
+            response.put("errors", errors);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
         try {
-
             clienteUpdated = clienteService.saveCustomerByDTO(id, clienteDTO);
-
         } catch (DataAccessException e) {
             response.put("mensaje", "Erorr al actualizar el cliente");
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));

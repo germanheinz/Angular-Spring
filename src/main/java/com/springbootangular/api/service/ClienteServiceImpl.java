@@ -46,7 +46,7 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.findById(id)
                 .map(clienteMapper::customerToCustomerDTO)
                 .map(clienteDTO -> {
-                    //clienteDTO.setCustomerUrl(getCustomerUrl(id));
+                    clienteDTO.setCustomerUrl(getCustomerUrl(id));
                     return clienteDTO;
                 })
                 .orElseThrow(ResourceNotFoundException::new);
