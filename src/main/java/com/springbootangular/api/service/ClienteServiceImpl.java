@@ -6,6 +6,8 @@ import com.springbootangular.api.repository.ClienteRepository;
 import com.springbootangular.api.v1.mapper.ClienteMapper;
 import com.springbootangular.api.v1.model.ClienteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,11 @@ public class ClienteServiceImpl implements ClienteService {
                     return clienteDTO;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Cliente> findAll(Pageable pageable) {
+        return clienteRepository.findAll(pageable);
     }
 
     @Override

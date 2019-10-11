@@ -1,10 +1,14 @@
 package com.springbootangular.api.controller;
 
 
+import com.springbootangular.api.domain.Cliente;
 import com.springbootangular.api.service.ClienteService;
 import com.springbootangular.api.v1.model.ClienteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -34,6 +38,13 @@ public class ClienteController {
     @ResponseStatus(HttpStatus.OK)
     public List<ClienteDTO> getListCustomers() {
         return clienteService.findAll();
+    }
+
+    @GetMapping({"page/{page}"})
+    @ResponseStatus(HttpStatus.OK)
+    public Page<Cliente> getListCustomers(@PathVariable Integer page) {
+        Pageable pageable = PageRequest.of(page, 5);
+        return clienteService.findAll(pageable);
     }
 
     @GetMapping({"/{id}"})

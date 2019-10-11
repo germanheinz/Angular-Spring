@@ -14,10 +14,11 @@ import javax.validation.constraints.Size;
 public class ClienteDTO {
 
     private Long id;
-    @NotEmpty
-    @Size(min=3, max=12)
+    //Esta anotacion con mensaje es para manejar los errores y que sean en spanish
+    @NotEmpty(message = "El campo no puede estar vacio")
+    @Size(min=3, max=12, message = "Debe ser entre 4 y 12")
     private String nombre;
-    @NotEmpty
+    @NotEmpty(message = "El campo no puede estar vacio")
     private String apellido;
 
     //@JsonProperty("customer_url")
