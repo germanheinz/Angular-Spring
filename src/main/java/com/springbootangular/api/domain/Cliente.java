@@ -29,4 +29,6 @@ public class Cliente implements Serializable {
     //@Temporal(TemporalType.DATE)
     private String customerUrl;
 
+    private String foto;
+
 }

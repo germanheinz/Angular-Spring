@@ -13,11 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
@@ -135,5 +141,28 @@ public class ClienteController {
         }
         response.put("mensaje", "Todo ok");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
+    @PostMapping("/upload")
+    public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id){
+
+        Map<String, Object> response = new HashMap<>();
+        ClienteDTO cliente = clienteService.findById(id);
+
+        if(!archivo.isEmpty()){
+            String nombreArchivo = UUID.randomUUID().toString()+""+archivo.getOriginalFilename().replace(" ","");
+            Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
+            try {
+                Files.copy(archivo.getInputStream(), rutaArchivo);
+            } catch (IOException e) {
+                response.put("mensaje", "Error al subir Imagen del cliente de la base de datos");
+                response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            cliente.setFoto(nombreArchivo);
+            clienteService.save(cliente);
+            response.put("cliente", cliente);
+            response.put("mensaje","Has subido correctamente la imagen " + nombreArchivo);
+        }
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 }

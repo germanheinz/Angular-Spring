@@ -23,4 +23,6 @@ public class ClienteDTO {
 
     //@JsonProperty("customer_url")
     private String customerUrl;
+
+    private String foto;
 }
