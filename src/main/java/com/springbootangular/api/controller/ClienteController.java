@@ -3,6 +3,7 @@ package com.springbootangular.api.controller;
 
 import com.springbootangular.api.domain.Cliente;
 import com.springbootangular.api.service.ClienteService;
+import com.springbootangular.api.service.UploadFile;
 import com.springbootangular.api.v1.model.ClienteDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +21,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.validation.Valid;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:4200"})
@@ -41,15 +36,15 @@ public class ClienteController {
 
     public static final String BASE_URL = "/api/clientes";
 
-    //---- Inicializo el log -------//
 
-    private final Logger log = LoggerFactory.getLogger(ClienteController.class);
-
-    @Autowired
     public ClienteService clienteService;
 
-    public ClienteController(ClienteService clienteService) {
+
+    public UploadFile uploadFile;
+
+    public ClienteController(ClienteService clienteService, UploadFile uploadFile) {
         this.clienteService = clienteService;
+        this.uploadFile = uploadFile;
     }
 
     @GetMapping
@@ -98,13 +93,14 @@ public class ClienteController {
         response.put("mensaje", "El cliente se ha creado con exito");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
-/*
-* Para validar todas las anotaciones en el modelo Entity Clientes se debe anotar @Valid seguido de @RequestBody + el objeto
 
-* Despues BindingResult result nos dira los errores que hubieron
-*
-* se hace un condicional para obtenerlos en caso de que hubiesen
-* * */
+    /*
+     * Para validar todas las anotaciones en el modelo Entity Clientes se debe anotar @Valid seguido de @RequestBody + el objeto
+
+     * Despues BindingResult result nos dira los errores que hubieron
+     *
+     * se hace un condicional para obtenerlos en caso de que hubiesen
+     * * */
     @PutMapping({"/{id}"})
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> updateCustomer(@Valid @RequestBody ClienteDTO clienteDTO, @PathVariable Long id, BindingResult result) {
@@ -146,35 +142,35 @@ public class ClienteController {
         Map<String, Object> response = new HashMap<>();
         try {
             ClienteDTO cliente = clienteService.findById(id);
+
             String nombreFotoAnterior = cliente.getFoto();
 
-            if(nombreFotoAnterior != null && nombreFotoAnterior.length()>0){
-                Path rutaFotoAnterior = Paths.get("upload").resolve(nombreFotoAnterior).toAbsolutePath();
-                File archivoFotoAnterior = rutaFotoAnterior.toFile();
-                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
-                    archivoFotoAnterior.delete();
-                }
-            }
+            uploadFile.eliminar(nombreFotoAnterior);
+
             clienteService.delete(id);
+
         } catch (DataAccessException e) {
+
             response.put("mensaje", "Error al eliminar el cliente de la base de datos");
+
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("mensaje", "Todo ok");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
+
     @PostMapping("/upload")
-    public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id){
+    public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id) {
 
         Map<String, Object> response = new HashMap<>();
         ClienteDTO cliente = clienteService.findById(id);
 
-        if(!archivo.isEmpty()){
-            String nombreArchivo = UUID.randomUUID().toString()+""+archivo.getOriginalFilename().replace(" ","");
-            Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
+        if (!archivo.isEmpty()) {
+            String nombreArchivo = null;
             try {
-                Files.copy(archivo.getInputStream(), rutaArchivo);
+                uploadFile.copiar(archivo);
             } catch (IOException e) {
                 response.put("mensaje", "Error al subir Imagen del cliente de la base de datos");
                 response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
@@ -182,19 +178,13 @@ public class ClienteController {
             }
             String nombreFotoAnterior = cliente.getFoto();
 
-            if(nombreFotoAnterior != null && nombreFotoAnterior.length()>0){
-                Path rutaFotoAnterior = Paths.get("upload").resolve(nombreFotoAnterior).toAbsolutePath();
-                File archivoFotoAnterior = rutaFotoAnterior.toFile();
-                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
-                    archivoFotoAnterior.delete();
-                }
-            }
+           uploadFile.eliminar(nombreFotoAnterior);
 
 
             cliente.setFoto(nombreArchivo);
             clienteService.save(cliente);
             response.put("cliente", cliente);
-            response.put("mensaje","Has subido correctamente la imagen " + nombreArchivo);
+            response.put("mensaje", "Has subido correctamente la imagen " + nombreArchivo);
         }
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
@@ -203,26 +193,19 @@ public class ClienteController {
     //-------Metodo para descargar la Imagen-------------//
 
     @GetMapping("/upload/img/{nombreFoto:.+}")
-    public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
-        Path rutaArchivo = Paths.get("uploads").resolve(nombreFoto).toAbsolutePath();
-        Resource recurso = null;
-        log.info(rutaArchivo.toString());
+    public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto) {
 
-        try {
-            recurso= new UrlResource(rutaArchivo.toUri());
-        } catch (MalformedURLException e) {
+        Resource recurso= null;
+        try{
+        uploadFile.cargar(nombreFoto);
+        }catch (MalformedURLException e){
             e.printStackTrace();
         }
-
-        if(!recurso.exists() && !recurso.isReadable()){
-            throw new RuntimeException("Error no se pudo cargar la imagen");
-        }
-
         //****Cargo la cabecera para forzar la descarga****
         HttpHeaders cabecera = new HttpHeaders();
-        cabecera.add(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + recurso.getFilename() + "\"");
+        cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + recurso.getFilename() + "\"");
 
 
-        return new ResponseEntity<Resource>(recurso,cabecera, HttpStatus.OK);
+        return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
     }
 }
