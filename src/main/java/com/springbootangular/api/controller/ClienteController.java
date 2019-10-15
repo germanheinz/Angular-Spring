@@ -4,11 +4,17 @@ package com.springbootangular.api.controller;
 import com.springbootangular.api.domain.Cliente;
 import com.springbootangular.api.service.ClienteService;
 import com.springbootangular.api.v1.model.ClienteDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,6 +40,10 @@ import java.util.stream.Collectors;
 public class ClienteController {
 
     public static final String BASE_URL = "/api/clientes";
+
+    //---- Inicializo el log -------//
+
+    private final Logger log = LoggerFactory.getLogger(ClienteController.class);
 
     @Autowired
     public ClienteService clienteService;
@@ -133,6 +145,16 @@ public class ClienteController {
     public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
+            ClienteDTO cliente = clienteService.findById(id);
+            String nombreFotoAnterior = cliente.getFoto();
+
+            if(nombreFotoAnterior != null && nombreFotoAnterior.length()>0){
+                Path rutaFotoAnterior = Paths.get("upload").resolve(nombreFotoAnterior).toAbsolutePath();
+                File archivoFotoAnterior = rutaFotoAnterior.toFile();
+                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
+                    archivoFotoAnterior.delete();
+                }
+            }
             clienteService.delete(id);
         } catch (DataAccessException e) {
             response.put("mensaje", "Error al eliminar el cliente de la base de datos");
@@ -158,11 +180,49 @@ public class ClienteController {
                 response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
+            String nombreFotoAnterior = cliente.getFoto();
+
+            if(nombreFotoAnterior != null && nombreFotoAnterior.length()>0){
+                Path rutaFotoAnterior = Paths.get("upload").resolve(nombreFotoAnterior).toAbsolutePath();
+                File archivoFotoAnterior = rutaFotoAnterior.toFile();
+                if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()){
+                    archivoFotoAnterior.delete();
+                }
+            }
+
+
             cliente.setFoto(nombreArchivo);
             clienteService.save(cliente);
             response.put("cliente", cliente);
             response.put("mensaje","Has subido correctamente la imagen " + nombreArchivo);
         }
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+    }
+
+
+    //-------Metodo para descargar la Imagen-------------//
+
+    @GetMapping("/upload/img/{nombreFoto:.+}")
+    public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
+        Path rutaArchivo = Paths.get("uploads").resolve(nombreFoto).toAbsolutePath();
+        Resource recurso = null;
+        log.info(rutaArchivo.toString());
+
+        try {
+            recurso= new UrlResource(rutaArchivo.toUri());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        if(!recurso.exists() && !recurso.isReadable()){
+            throw new RuntimeException("Error no se pudo cargar la imagen");
+        }
+
+        //****Cargo la cabecera para forzar la descarga****
+        HttpHeaders cabecera = new HttpHeaders();
+        cabecera.add(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=\"" + recurso.getFilename() + "\"");
+
+
+        return new ResponseEntity<Resource>(recurso,cabecera, HttpStatus.OK);
     }
 }
