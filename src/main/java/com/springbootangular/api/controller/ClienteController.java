@@ -5,12 +5,7 @@ import com.springbootangular.api.domain.Cliente;
 import com.springbootangular.api.service.ClienteService;
 import com.springbootangular.api.service.UploadFile;
 import com.springbootangular.api.v1.model.ClienteDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,13 +56,14 @@ public class ClienteController {
         return clienteService.findAll(pageable);
     }
 
+    @Secured({"ROLE_ADMIN","ROLE_USER"})
     @GetMapping({"/{id}"})
     @ResponseStatus(HttpStatus.OK)
     public ClienteDTO getCustomerById(@PathVariable Long id) {
         return clienteService.findById(id);
 
     }
-
+    @Secured({"ROLE_ADMIN"})
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     //public ClienteDTO createdCustomer(@PathVariable Long Id, @RequestBody ClienteDTO clienteDTO){
@@ -101,6 +98,7 @@ public class ClienteController {
      *
      * se hace un condicional para obtenerlos en caso de que hubiesen
      * * */
+    @Secured({"ROLE_ADMIN"})
     @PutMapping({"/{id}"})
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> updateCustomer(@Valid @RequestBody ClienteDTO clienteDTO, @PathVariable Long id, BindingResult result) {
@@ -135,7 +133,7 @@ public class ClienteController {
         response.put("cliente", clienteUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
-
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping({"/{id}"})
     //@ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
@@ -160,7 +158,7 @@ public class ClienteController {
         response.put("mensaje", "Todo ok");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
-
+    @Secured({"ROLE_ADMIN","ROLE_USER"})
     @PostMapping("/upload")
     public ResponseEntity<?> upload(@RequestParam("archivo") MultipartFile archivo, @RequestParam("id") Long id) {
 
