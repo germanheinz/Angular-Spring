@@ -1,12 +1,23 @@
 package com.springbootangular.api.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
+
 import java.io.Serializable;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 
 //Anotacion de lombock, simplifica clase, sin tener que visualizar setters y getters
 @Data
@@ -24,11 +35,18 @@ public class Cliente implements Serializable {
     private String email;
     //La anotacion column va para las diferentes columnas en la tabla
     //pero especificamente para especificar un nombre diferente en que va a mappear en la tabla
-    @Column(name="customer_url")
+    @Column(name="create_at")
     //Anotacion para transformar el valor en un tipo DATE en la tabla
     //@Temporal(TemporalType.DATE)
     private String customerUrl;
 
     private String foto;
 
+    @JsonIgnoreProperties(value={"cliente", "hibernateLazyInitializer", "handler"}, allowSetters=true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cliente", cascade = CascadeType.ALL)
+    private List<Factura> facturas;
+
+    public Cliente() {
+        this.facturas = new ArrayList<>();
+    }
 }

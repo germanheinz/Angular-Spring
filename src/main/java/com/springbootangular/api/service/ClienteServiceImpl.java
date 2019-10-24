@@ -90,6 +90,12 @@ public class ClienteServiceImpl implements ClienteService {
        clienteRepository.deleteById(id);
     }
 
+    @Override
+    public Cliente findByIdCliente(Long id) {
+        return clienteRepository.findById(id)
+                .orElseThrow(ResourceNotFoundException::new);
+    }
+
     private String getCustomerUrl(Long id) {
         return ClienteController.BASE_URL + "/" + id;
     }

@@ -56,13 +56,20 @@ public class ClienteController {
         return clienteService.findAll(pageable);
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_USER"})
-    @GetMapping({"/{id}"})
+    // @Secured({"ROLE_ADMIN","ROLE_USER"})
+    /*@GetMapping({"/{id}"})
     @ResponseStatus(HttpStatus.OK)
     public ClienteDTO getCustomerById(@PathVariable Long id) {
         return clienteService.findById(id);
+    }*/
 
+    // Metodo creado a partir de Facturas
+    @GetMapping({"/{id}"})
+    @ResponseStatus(HttpStatus.OK)
+    public Cliente getClienteById(@PathVariable Long id) {
+        return clienteService.findByIdCliente(id);
     }
+
     @Secured({"ROLE_ADMIN"})
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)

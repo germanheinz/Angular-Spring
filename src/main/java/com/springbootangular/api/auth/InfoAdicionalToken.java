@@ -23,7 +23,7 @@ public class InfoAdicionalToken implements TokenEnhancer {
 
         Usuario usuario = iUsuarioService.findByUsername(oAuth2Authentication.getName());
         Map<String, Object> info = new HashMap<>();
-        info.put("Hello!!",usuario.getId()+usuario.getUsername());
+        info.put("Hello!! ",usuario.getUsername());
         info.put("Este es el nombre", usuario.getNombre());
         info.put("Este es el apellido", usuario.getApellido());
         info.put("Este es el email", usuario.getEmail());

@@ -22,5 +22,7 @@ public interface ClienteService {
 
     void delete(Long id);
 
+    Cliente findByIdCliente(Long id);
+
 
 }
