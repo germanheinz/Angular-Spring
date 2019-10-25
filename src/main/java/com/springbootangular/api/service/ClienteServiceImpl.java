@@ -2,7 +2,9 @@ package com.springbootangular.api.service;
 
 import com.springbootangular.api.controller.ClienteController;
 import com.springbootangular.api.domain.Cliente;
+import com.springbootangular.api.domain.Factura;
 import com.springbootangular.api.repository.ClienteRepository;
+import com.springbootangular.api.repository.FacturaRepository;
 import com.springbootangular.api.v1.mapper.ClienteMapper;
 import com.springbootangular.api.v1.model.ClienteDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,13 @@ public class ClienteServiceImpl implements ClienteService {
 
     private ClienteMapper clienteMapper;
 
-    @Autowired
-    public ClienteServiceImpl(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
+    private FacturaRepository facturaRepository;
+
+
+    public ClienteServiceImpl(ClienteRepository clienteRepository, ClienteMapper clienteMapper, FacturaRepository facturaRepository) {
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
+        this.facturaRepository = facturaRepository;
     }
 
     @Override
@@ -95,6 +100,28 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.findById(id)
                 .orElseThrow(ResourceNotFoundException::new);
     }
+
+    // ****** Metodos Factura ****** //
+
+    @Override
+    @Transactional(readOnly = true)
+    public Factura findFacturaById(Long id) {
+        return facturaRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public Factura saveFactura(Factura factura) {
+        return facturaRepository.save(factura);
+    }
+
+    @Override
+    @Transactional
+    public void deleteFacturaById(Long id) {
+        facturaRepository.deleteById(id);
+    }
+
+
 
     private String getCustomerUrl(Long id) {
         return ClienteController.BASE_URL + "/" + id;
