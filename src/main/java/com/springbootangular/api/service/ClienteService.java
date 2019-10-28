@@ -1,6 +1,7 @@
 package com.springbootangular.api.service;
 
 import com.springbootangular.api.domain.Factura;
+import com.springbootangular.api.domain.Producto;
 import com.springbootangular.api.v1.model.ClienteDTO;
 import com.springbootangular.api.domain.Cliente;
 import org.springframework.data.domain.Page;
@@ -31,5 +32,7 @@ public interface ClienteService {
     public Factura saveFactura(Factura factura);
 
     public void deleteFacturaById(Long id);
+
+    public List<Producto> findByNombre(String term);
 
 }
